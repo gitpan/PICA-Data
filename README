@@ -1,0 +1,67 @@
+NAME
+    PICA::Data - PICA record processing
+
+FUNCTIONS
+  pica_parser( $type [, @options] )
+    Create a PICA parsers object. Case of the type is ignored and additional
+    parameters are passed to the parser's constructor.
+
+    PICA::Parser::XML
+        Type "xml" or "picaxml" for PICA+ in XML
+
+    PICA::Parser::Plus
+        Type "plus" or "picaplus" for normalizes PICA+
+
+    PICA::Parser::Plain
+        Type "plain" for plain, human-readable PICA+
+
+  pica_writer( $type [, @options] )
+    Create a PICA writer object in the same way as "pica_parser" with one of
+
+    PICA::Writer::XML
+    PICA::Writer::Plus
+    PICA::Writer::Plain
+
+  pica_values( $record, $path )
+    Extract a list of subfield values from a PICA record based on a PICA
+    path expression.
+
+    This function can also be called as "values" on a blessed PICA::Data
+    record:
+
+        bless $record, 'PICA::Data';
+        $record->values($path);
+
+  pica_value( $record, $path )
+    Same as "pica_values" but only returns the first value. Can also be
+    called as "value" on a blessed PICA::Data record.
+
+  pica_fields( $record, $path )
+    Returns a PICA record limited to fields specified in a PICA path
+    expression. Always returns an array reference. Can also be called as
+    "fields" on a blessed PICA::Data record.
+
+  pica_path( $path )
+    Equivalent to "PICA::Path->new($path)".
+
+CONTRIBUTORS
+    Johann Rolschewski, "<rolschewski@gmail.com>"
+
+    Jakob Voss "<voss@gbv.de>"
+
+COPYRIGHT
+    Copyright 2014- Johann Rolschewski and Jakob Voss
+
+LICENSE
+    This library is free software; you can redistribute it and/or modify it
+    under the same terms as Perl itself.
+
+SEE ALSO
+    Use Catmandu::PICA for processing PICA records with the Catmandu
+    toolkit, for instance to convert PICA XML to plain PICA+:
+
+       catmandu convert PICA --type xml to PICA --type plain < picadata.xml
+
+    PICA::Record implements an alternative framework for processing PICA+
+    records but development of the module is stalled.
+
