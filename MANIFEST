@@ -22,6 +22,8 @@ t/00-load.t
 t/10-data.t
 t/20-parser.t
 t/30-writer.t
+t/40-holdings.t
+t/files/bgb.example
 t/files/dump.dat
 t/files/picaplus.dat
 t/files/picaxml.xml

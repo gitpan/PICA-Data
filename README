@@ -26,12 +26,6 @@ FUNCTIONS
     Extract a list of subfield values from a PICA record based on a PICA
     path expression.
 
-    This function can also be called as "values" on a blessed PICA::Data
-    record:
-
-        bless $record, 'PICA::Data';
-        $record->values($path);
-
   pica_value( $record, $path )
     Same as "pica_values" but only returns the first value. Can also be
     called as "value" on a blessed PICA::Data record.
@@ -41,8 +35,28 @@ FUNCTIONS
     expression. Always returns an array reference. Can also be called as
     "fields" on a blessed PICA::Data record.
 
+  pica_holdings( $record )
+    Returns a list (as array reference) of local holding records (level 1
+    and 2), where the "_id" of each record contains the ILN (subfield
+    "101@a").
+
+  pica_items( $record )
+    Returns a list (as array reference) of item records (level 1), where the
+    "_id" of each record contains the EPN (subfield "203@/**0").
+
+  pica_items( $record )
   pica_path( $path )
     Equivalent to "PICA::Path->new($path)".
+
+OBJECT ORIENTED INTERFACE
+    All "pica_..." function that expect a record as first argument can also
+    be called as method on a blessed PICA::Data record by stripping the
+    "pica_..." prefix:
+
+        bless $record, 'PICA::Data';
+        $record->values($path);
+        $record->items;
+        ...
 
 CONTRIBUTORS
     Johann Rolschewski, "<rolschewski@gmail.com>"
