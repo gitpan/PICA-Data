@@ -1,5 +1,9 @@
 Revision history for PICA::Data
 
+0.22  2014-09-18 14:42:01 CEST
+    - extend PICA path expressions
+    - fix dependency
+
 0.21  2014-09-18 11:06:29 CEST
     - added pica_holdings and pica_items (close #1)
 
