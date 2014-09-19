@@ -10,11 +10,12 @@ README
 cpanfile
 dist.ini
 lib/PICA/Data.pm
+lib/PICA/Parser/Base.pm
 lib/PICA/Parser/Plain.pm
 lib/PICA/Parser/Plus.pm
 lib/PICA/Parser/XML.pm
 lib/PICA/Path.pm
-lib/PICA/Writer/Handle.pm
+lib/PICA/Writer/Base.pm
 lib/PICA/Writer/Plain.pm
 lib/PICA/Writer/Plus.pm
 lib/PICA/Writer/XML.pm

@@ -1,26 +1,90 @@
 NAME
     PICA::Data - PICA record processing
 
-FUNCTIONS
+SYNOPSIS
+        use PICA::Data ':all';
+        $parser = pica_parser( xml => @options );
+        $writer = pica_writer( plain => @options );
+   
+        use PICA::Parser::XML;
+        use PICA::Writer::Plain;
+        $parser = PICA::Parser::XML->new( @options );
+        $writer = PICA::Writer::Plain->new( @options );
+
+        while ( my $record = $parser->next ) {
+            my $ppn      = pica_value($record, '003@0'); # == $record->{_id}
+            my $holdings = pica_holdings($record);
+            my $items    = pica_holdings($record);
+            ...
+        }
+  
+        # parse single record from string
+        my $record = pica_parser('plain', \"...")->next;
+
+DESCRIPTION
+    PICA::Data provides methods, classes, and functions to process PICA+
+    records in Perl.
+
+    PICA+ is the internal data format of the Local Library System (LBS) and
+    the Central Library System (CBS) of OCLC, formerly PICA. Similar library
+    formats are the MAchine Readable Cataloging format (MARC) and the
+    Maschinelles Austauschformat fuer Bibliotheken (MAB). In addition to
+    PICA+ in CBS there is the cataloging format Pica3 which can losslessly
+    be convert to PICA+ and vice versa.
+
+    Records in PICA::Data are encoded either as as array of arrays, the
+    inner arrays representing PICA fields, or as an object with two fields,
+    "_id" and "record", the latter holding the record as array of arrays,
+    and the former holding the record identifier, stored in field "003@",
+    subfield 0. For instance a minimal record with just one field "003@":
+
+        {
+          _id    => '12345X',
+          record => [
+            [ '003@', undef, '0' => '12345X' ]
+          ]
+        }
+
+    or in short form:
+
+        [ [ '003@', undef, '0' => '12345X' ] ]
+
+    PICA path expressions can be used to facilitate processing PICA+
+    records.
+
+CONSTRUCTORS
   pica_parser( $type [, @options] )
     Create a PICA parsers object. Case of the type is ignored and additional
     parameters are passed to the parser's constructor.
 
-    PICA::Parser::XML
-        Type "xml" or "picaxml" for PICA+ in XML
+    *   PICA::Parser::XML for type "xml" or "picaxml" (PICA-XML)
 
-    PICA::Parser::Plus
-        Type "plus" or "picaplus" for normalizes PICA+
+    *   PICA::Parser::Plus for type "plus" or "picaplus" (normalized PICA+)
 
-    PICA::Parser::Plain
-        Type "plain" for plain, human-readable PICA+
+    *   PICA::Parser::Plain for type "plain" or "picaplain" (human-readable
+        PICA+)
 
   pica_writer( $type [, @options] )
     Create a PICA writer object in the same way as "pica_parser" with one of
 
-    PICA::Writer::XML
-    PICA::Writer::Plus
-    PICA::Writer::Plain
+    *   PICA::Writer::XML for type "xml" or "picaxml" (PICA-XML)
+
+    *   PICA::Writer::Plus for type "plus" or "picaplus" (normalized PICA+)
+
+    *   PICA::Writer::Plain for type "plain" or "picaplain" (human-readable
+        PICA+)
+
+  pica_path( $path )
+    Equivalent to "PICA::Path->new($path)".
+
+ACCESSORS
+    The following function can also be called as method on a blessed
+    PICA::Data record by stripping the "pica_..." prefix:
+
+        bless $record, 'PICA::Data';
+        $record->values($path);
+        $record->items;
+        ...
 
   pica_values( $record, $path )
     Extract a list of subfield values from a PICA record based on a PICA
@@ -43,20 +107,6 @@ FUNCTIONS
   pica_items( $record )
     Returns a list (as array reference) of item records (level 1), where the
     "_id" of each record contains the EPN (subfield "203@/**0").
-
-  pica_items( $record )
-  pica_path( $path )
-    Equivalent to "PICA::Path->new($path)".
-
-OBJECT ORIENTED INTERFACE
-    All "pica_..." function that expect a record as first argument can also
-    be called as method on a blessed PICA::Data record by stripping the
-    "pica_..." prefix:
-
-        bless $record, 'PICA::Data';
-        $record->values($path);
-        $record->items;
-        ...
 
 CONTRIBUTORS
     Johann Rolschewski, "<rolschewski@gmail.com>"

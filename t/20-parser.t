@@ -3,7 +3,7 @@ use warnings;
 use Test::More;
 use utf8;
 
-use PICA::Data qw(pica_parser);
+use PICA::Data qw(pica_parser pica_writer);
 use PICA::Parser::XML;
 my $parser = pica_parser( XML => './t/files/picaxml.xml' );
 isa_ok $parser, 'PICA::Parser::XML';
@@ -29,9 +29,9 @@ $parser = PICA::Parser::XML->new(\$xml);
 ok $parser->next_record, 'read from string reference';
 
 use PICA::Parser::Plus;
-$parser = PICA::Parser::Plus->new( './t/files/picaplus.dat' );
+$parser = pica_parser('plus' => './t/files/picaplus.dat');
 isa_ok $parser, 'PICA::Parser::Plus';
-$record = $parser->next();
+$record = $parser->next;
 ok $record->{_id} eq '1041318383', 'record _id';
 ok $record->{record}->[0][0] eq '001A', 'tag from first field';
 is_deeply $record->{record}->[0], ['001A', '', '0', '1240:04-09-13'], 'first field';
@@ -41,6 +41,12 @@ is_deeply $record->{record}->[3],
 my $count = 0;
 while( $parser->next ) { $count++ }
 is $count, 8, 'remaining records';
+
+open my $fh, '<', 't/files/picaplus.dat';
+$parser = PICA::Parser::Plus->new($fh);
+$count = 0;
+while( $parser->next ) { $count++ };
+is $count, 10, 'parse plus from file handle';
 
 use PICA::Parser::Plain;
 $parser = PICA::Parser::Plain->new( './t/files/plain.pica' );
@@ -52,5 +58,52 @@ is_deeply $record->{record}->[9],
 is_deeply $record->{record}->[13],
     [ '203@', '01', 0 => '917400194', x => '', y => '' ], 'empty subfields';
 ok !$parser->next, 'last record';
+
+my $str = '003@ '.PICA::Parser::Plus::SUBFIELD_INDICATOR.'01234'
+        . PICA::Parser::Plus::END_OF_FIELD
+        . '021A '.PICA::Parser::Plus::SUBFIELD_INDICATOR.'aHello $¥!'
+        . PICA::Parser::Plus::END_OF_RECORD;
+
+SKIP: {
+    skip "utf8 is driving me crazy", 1;
+    # TODO: why UTF-8 encoded while PICA plain is not?
+    # See https://travis-ci.org/gbv/PICA-Data/builds/35711139
+    use Encode;
+    $record = [
+         [ '003@', '', '0', '1234' ],
+        # ok in perl <= 5.16
+         [ '021A', '', 'a', encode('UTF-8',"Hello \$\N{U+00A5}!") ]
+        # ok in perl >= 5.18  
+        # [ '021A', '', 'a', 'Hello $¥!' ]
+        ];
+     
+    open my $fh, '<', \$str;
+    is_deeply pica_parser( plus => $fh )->next, { 
+        _id => 1234, record => $record
+    }, 'Plus format UTF-8 from string';
+};
+
+# what can possibly go wrong...
+
+eval { pica_parser('doesnotexist') };
+ok $@, 'unknown parser';
+
+eval { pica_parser( xml => '' ) };
+ok $@, 'invalid handle';
+
+eval { pica_parser( plus => [] ) };
+ok $@, 'invalid handle';
+
+eval { pica_parser( plain => bless({},'MyFooBar') ) };
+ok $@, 'invalid handle';
+
+ok pica_parser('plus', \"003@ \x{1F}01")->next;
+foreach ("0033 \x{1F}01", "003@/0 \x{1F}01") {
+    eval { pica_parser('plus', \$_)->next };
+    ok $@, 'invalid PICA field structure in PICA plus';
+    my  $field = $_; $field =~ s/\x{1F}/\$/g;
+    eval { pica_parser('plain', \$field)->next };
+    ok $@, 'invalid PICA field structure in PICA plain';
+}
 
 done_testing;

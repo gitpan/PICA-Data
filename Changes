@@ -1,5 +1,9 @@
 Revision history for PICA::Data
 
+0.23  2014-09-19 12:12:23 CEST
+    - removed dependency on Moo (close #6)
+    - fixed PICA::Parser::Plus
+
 0.22  2014-09-18 14:42:01 CEST
     - extend PICA path expressions
     - fix dependency
